@@ -6,28 +6,43 @@ class SudokuSolver {
 
     generateSudoku() {
         let board = Array.from({ length: 9 }, () => Array(9).fill(0));
-        this.solveSudoku(board); // Генерируем решенное судоку
-        this.solution = JSON.parse(JSON.stringify(board)); // Сохраняем решение (опционально)
-        return board; // Возвращаем заполненную доску
+        this.solveSudoku(board);
+        this.solution = JSON.parse(JSON.stringify(board)); // Сохраняем решение
+
+        // Удаляем числа для создания головоломки
+        let attempts = 60; // Количество удаляемых ячеек
+        while (attempts > 0) {
+            let row = Math.floor(Math.random() * 9);
+            let col = Math.floor(Math.random() * 9);
+            if (board[row][col] !== 0) {
+                board[row][col] = 0; // Удаляем число
+                attempts--;
+            }
+        }
+        
+        return board;
     }
 
+
     initializeGrid() {
-        const sudokuPuzzle = this.generateSudoku(); // Получаем заполненную доску
+        const sudokuPuzzle = this.generateSudoku(); // Генерируем новую головоломку
         for (let i = 0; i < 9; i++) {
             for (let j = 0; j < 9; j++) {
                 const cell = document.createElement('input');
                 cell.type = 'text';
                 cell.className = 'cell';
                 cell.maxLength = 1;
-                cell.value = sudokuPuzzle[i][j]; // Все ячейки будут заполнены
-                cell.readOnly = true; // Делаем все ячейки неизменяемыми (опционально)
-                
-                // Обработка ввода (если readOnly = false)
+                // Заполнение ячейки числом (или пустой строкой, если 0)
+                cell.value = sudokuPuzzle[i][j] !== 0 ? sudokuPuzzle[i][j] : '';
+                cell.isInitial = sudokuPuzzle[i][j] !== 0;
+                cell.readOnly = cell.isInitial; // Блокировка редактирования начальных чисел
+    
+                // Обработка ввода (разрешаем только цифры 1-9)
                 cell.addEventListener('input', (event) => {
                     event.target.value = event.target.value.replace(/[^1-9]/g, '');
                 });
-
-                this.sudokuGrid.appendChild(cell);
+    
+                this.sudokuGrid.appendChild(cell); // Добавление ячейки в DOM
             }
         }
     }
